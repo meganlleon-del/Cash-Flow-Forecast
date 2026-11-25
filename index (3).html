@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Budgeting & Cash Flow Forecast</title>
+<style>
+:root{--navy:#102b4e;--navy2:#1c4775;--blue:#2878c8;--ink:#17283d;--muted:#64748b;--line:#dce5ef;--bg:#f3f6fa;--green:#13845b;--red:#c33d4b;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--ink)}
+header{background:linear-gradient(115deg,var(--navy),var(--navy2));color:#fff;padding:27px max(22px,calc((100% - 1180px)/2))}
+.eyebrow{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;opacity:.75;font-weight:700}
+header h1{font-size:clamp(24px,4vw,34px);margin:8px 0 6px}header p{margin:0;color:#d8e6f5;font-size:14px}
+main{max-width:1180px;margin:25px auto;padding:0 20px 42px}
+.layout{display:grid;grid-template-columns:340px minmax(0,1fr);gap:20px;align-items:start}
+.panel,.metric,.chart-panel,.info-panel{background:var(--white);border:1px solid var(--line);border-radius:14px;box-shadow:0 4px 16px rgba(16,43,78,.045)}
+.panel{padding:21px}.panel h2,.chart-panel h2,.info-panel h2{font-size:17px;margin:0 0 5px}.sub{font-size:12px;color:var(--muted);margin:0 0 19px}
+.field{margin:0 0 14px}.field label{display:block;font-size:12px;font-weight:700;color:#34465c;margin-bottom:6px}
+.input-wrap{position:relative}.prefix,.suffix{position:absolute;top:50%;transform:translateY(-50%);color:#718096;font-size:13px;pointer-events:none}.prefix{left:12px}.suffix{right:12px}
+input{width:100%;height:41px;border:1px solid #cbd7e4;border-radius:8px;padding:0 34px 0 29px;font-size:14px;color:var(--ink);outline:none;background:#fff}
+input.percent{padding-left:12px;padding-right:34px}input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(40,120,200,.12)}
+.actions{display:flex;gap:9px;margin-top:18px}.btn{border:0;border-radius:8px;padding:11px 14px;font-weight:700;cursor:pointer;font-size:13px}.primary{background:var(--navy);color:#fff;flex:1}.secondary{background:#edf2f7;color:#34465c}.btn:hover{filter:brightness(1.06)}
+.right{min-width:0}.section-head{display:flex;justify-content:space-between;align-items:end;margin:2px 0 12px}.section-head h2{font-size:17px;margin:0}.section-head span{font-size:11px;color:var(--muted)}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.metric{padding:16px 15px;min-height:112px}.metric .label{font-size:11px;color:var(--muted);font-weight:700;line-height:1.35}.metric .value{font-size:clamp(19px,2.2vw,25px);font-weight:750;letter-spacing:-.5px;margin-top:11px;white-space:nowrap}.metric .hint{font-size:10px;color:var(--muted);margin-top:5px}
+.value.positive{color:var(--green)}.value.negative{color:var(--red)}
+.status{margin-top:13px;padding:13px 15px;border-radius:10px;background:#eef5fb;border:1px solid #d8e7f5;font-size:13px;line-height:1.5}.status.good{background:#edf8f3;border-color:#cdebdc}.status.bad{background:#fff1f1;border-color:#f2d4d7}
+.chart-panel{padding:20px;margin-top:18px}.chart-top{display:flex;justify-content:space-between;gap:12px;align-items:start}.chart-top p{font-size:12px;color:var(--muted);margin:5px 0 0}.legend{display:flex;gap:13px;flex-wrap:wrap;font-size:11px;color:#526174;margin-top:3px}.key{display:inline-flex;align-items:center;gap:5px}.dot{width:9px;height:9px;border-radius:3px;display:inline-block}
+canvas{display:block;width:100%;height:270px;margin-top:12px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}.info-panel{padding:18px}.info-panel h2{margin-bottom:10px}.formula{font-size:12px;line-height:1.8;color:#43546a}.formula strong{color:#20364f}.interpretation{font-size:13px;line-height:1.65;color:#43546a;margin:0}
+.foot{font-size:10px;color:#7a8797;text-align:center;margin-top:18px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.panel{order:0}.right{order:1}}
+@media(max-width:560px){main{padding:0 12px 28px;margin-top:14px}header{padding:23px 17px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.metric{padding:13px;min-height:100px}.metric .value{font-size:20px}.info-grid{grid-template-columns:1fr}.chart-panel{padding:15px}canvas{height:235px}.chart-top{display:block}}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">Financial planning dashboard</div>
+  <h1>Budgeting & Cash Flow Forecast</h1>
+  <p>Model monthly cash movement, evaluate your ending cash position, and estimate financing needs.</p>
+</header>
+<main>
+<div class="layout">
+  <section class="panel">
+    <h2>Monthly assumptions</h2>
+    <p class="sub">Edit the example values to forecast your own month.</p>
+    <div class="field"><label for="sales">Monthly sales revenue</label><div class="input-wrap"><span class="prefix">$</span><input id="sales" type="number" min="0" step="100" value="200000"></div></div>
+    <div class="field"><label for="collection">Cash collection percentage</label><div class="input-wrap"><input id="collection" class="percent" type="number" min="0" max="100" step="1" value="80"><span class="suffix">%</span></div></div>
+    <div class="field"><label for="expenses">Monthly operating expenses</label><div class="input-wrap"><span class="prefix">$</span><input id="expenses" type="number" min="0" step="100" value="90000"></div></div>
+    <div class="field"><label for="inventory">Monthly inventory purchases</label><div class="input-wrap"><span class="prefix">$</span><input id="inventory" type="number" min="0" step="100" value="45000"></div></div>
+    <div class="field"><label for="loan">Monthly loan payments</label><div class="input-wrap"><span class="prefix">$</span><input id="loan" type="number" min="0" step="100" value="15000"></div></div>
+    <div class="field"><label for="beginning">Beginning cash balance</label><div class="input-wrap"><span class="prefix">$</span><input id="beginning" type="number" step="100" value="30000"></div></div>
+    <div class="actions"><button class="btn primary" id="update">Update forecast</button><button class="btn secondary" id="reset">Reset</button></div>
+  </section>
+  <section class="right">
+    <div class="section-head"><h2>Forecast results</h2><span>Monthly view · USD</span></div>
+    <div class="metrics">
+      <div class="metric"><div class="label">Total cash inflows</div><div class="value" id="inflows">$160,000</div><div class="hint">Sales × collection rate</div></div>
+      <div class="metric"><div class="label">Total cash outflows</div><div class="value" id="outflows">$150,000</div><div class="hint">Operating + inventory + loan</div></div>
+      <div class="metric"><div class="label">Net monthly cash flow</div><div class="value positive" id="net">$10,000</div><div class="hint">Inflows − outflows</div></div>
+      <div class="metric"><div class="label">Ending cash balance</div><div class="value positive" id="ending">$40,000</div><div class="hint">Beginning cash + net cash flow</div></div>
+      <div class="metric"><div class="label">Cash surplus / (deficit)</div><div class="value positive" id="surplus">$40,000 surplus</div><div class="hint">Ending cash position</div></div>
+      <div class="metric"><div class="label">Additional financing needed</div><div class="value" id="financing">$0</div><div class="hint">Amount required to reach $0 cash</div></div>
+    </div>
+    <div class="status good" id="interpretation" aria-live="polite">Your forecast shows a positive ending cash balance of $40,000. Based on these assumptions, no additional financing is needed to keep cash at or above zero.</div>
+    <section class="chart-panel">
+      <div class="chart-top"><div><h2>Cash flow comparison</h2><p>Compare cash inflows, cash outflows, and ending cash balance.</p></div>
+        <div class="legend"><span class="key"><i class="dot" style="background:#2878c8"></i>Inflows</span><span class="key"><i class="dot" style="background:#e18b3c"></i>Outflows</span><span class="key"><i class="dot" style="background:#15966b"></i>Ending cash</span></div>
+      </div>
+      <canvas id="chart" role="img" aria-label="Bar chart comparing monthly cash inflows, outflows, and ending cash balance"></canvas>
+    </section>
+  </section>
+</div>
+<div class="info-grid">
+  <section class="info-panel"><h2>Formulas used</h2><div class="formula">
+    <strong>Cash inflows</strong> = Monthly sales revenue × Cash collection %<br>
+    <strong>Cash outflows</strong> = Operating expenses + Inventory purchases + Loan payments<br>
+    <strong>Net monthly cash flow</strong> = Cash inflows − Cash outflows<br>
+    <strong>Ending cash balance</strong> = Beginning cash balance + Net monthly cash flow<br>
+    <strong>Surplus / (deficit)</strong> = Ending cash balance<br>
+    <strong>Additional financing needed</strong> = MAX(0, −Ending cash balance)
+  </div></section>
+  <section class="info-panel"><h2>How to interpret the forecast</h2><p class="interpretation" id="explain">Cash collections are forecast at 80% of sales, producing $160,000 in cash inflows. After $150,000 of cash outflows, the month generates $10,000 in net cash flow. Starting with $30,000, the business ends with $40,000 in cash.</p></section>
+</div>
+<div class="foot">This is a simplified one-month planning tool. It assumes all listed expenses and purchases are paid during the month and excludes taxes, interest not included in loan payments, and other cash movements.</div>
+</main>
+<script>
+const ids=['sales','collection','expenses','inventory','loan','beginning'];
+const $=id=>document.getElementById(id);
+const money=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
+const number=id=>{const v=Number($(id).value);return Number.isFinite(v)?v:0};
+function drawChart(values){
+ const canvas=$('chart'),ctx=canvas.getContext('2d'),w=canvas.clientWidth,h=canvas.clientHeight,dpr=window.devicePixelRatio||1;
+ canvas.width=w*dpr;canvas.height=h*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+ const pad={l:62,r:16,t:18,b:43},cw=w-pad.l-pad.r,ch=h-pad.t-pad.b;
+ const max=Math.max(1,...values.map(v=>Math.max(0,v)))*1.18;
+ ctx.font='11px Segoe UI,Arial';ctx.textAlign='right';ctx.textBaseline='middle';
+ for(let i=0;i<=4;i++){let y=pad.t+ch-(ch*i/4),v=max*i/4;ctx.strokeStyle='#e8edf3';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();ctx.fillStyle='#718096';ctx.fillText(v>=1000?'$'+Math.round(v/1000)+'k':money(v),pad.l-9,y)}
+ const labels=['Cash inflows','Cash outflows','Ending cash'];const colors=['#2878c8','#e18b3c','#15966b'];const slot=cw/3,bw=Math.min(58,slot*.48);
+ values.forEach((v,i)=>{let bh=Math.max(0,v)/max*ch,x=pad.l+slot*i+(slot-bw)/2,y=pad.t+ch-bh;ctx.fillStyle=colors[i];ctx.beginPath();let radius=5;ctx.roundRect(x,y,bw,bh,[radius,radius,0,0]);ctx.fill();ctx.fillStyle='#34465c';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.font='bold 11px Segoe UI,Arial';ctx.fillText(v<0?'−'+money(Math.abs(v)):money(v),x+bw/2,Math.max(12,y-5));ctx.fillStyle='#596a7e';ctx.font='11px Segoe UI,Arial';ctx.textBaseline='top';ctx.fillText(labels[i],pad.l+slot*i+slot/2,pad.t+ch+12)});
+}
+function update(){
+ const sales=Math.max(0,number('sales')),pct=Math.min(100,Math.max(0,number('collection'))),expenses=Math.max(0,number('expenses')),inventory=Math.max(0,number('inventory')),loan=Math.max(0,number('loan')),beginning=number('beginning');
+ const inflows=sales*pct/100,outflows=expenses+inventory+loan,net=inflows-outflows,ending=beginning+net,financing=Math.max(0,-ending);
+ const set=(id,text,cls)=>{$(id).textContent=text;$(id).className='value '+(cls||'')};
+ set('inflows',money(inflows));set('outflows',money(outflows));set('net',money(net),net>=0?'positive':'negative');set('ending',money(ending),ending>=0?'positive':'negative');
+ set('surplus',ending>=0?money(ending)+' surplus':money(Math.abs(ending))+' deficit',ending>=0?'positive':'negative');set('financing',money(financing),financing>0?'negative':'positive');
+ const status=$('interpretation'),explain=$('explain');
+ if(ending>=0){status.className='status good';status.textContent=`Your forecast shows a positive ending cash balance of ${money(ending)}. Based on these assumptions, no additional financing is needed to keep cash at or above zero.`}
+ else{status.className='status bad';status.textContent=`Your forecast shows a cash deficit of ${money(Math.abs(ending))}. You would need at least ${money(financing)} in additional financing to bring ending cash to $0.`}
+ explain.textContent=`Cash collections are forecast at ${pct}% of sales, producing ${money(inflows)} in cash inflows. Total cash outflows are ${money(outflows)}, resulting in net monthly cash flow of ${money(net)}. Starting with ${money(beginning)}, the business ends the month with ${money(ending)}${financing>0?`, so at least ${money(financing)} in additional financing is needed to reach a zero cash balance`:'.'}`;
+ drawChart([inflows,outflows,ending]);
+}
+$('update').addEventListener('click',update);
+$('reset').addEventListener('click',()=>{const defaults={sales:200000,collection:80,expenses:90000,inventory:45000,loan:15000,beginning:30000};Object.entries(defaults).forEach(([k,v])=>$(k).value=v);update()});
+ids.forEach(id=>$(id).addEventListener('input',update));
+window.addEventListener('resize',update);update();
+</script>
+</body>
+</html>
